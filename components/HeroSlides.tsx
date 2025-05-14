@@ -37,7 +37,7 @@ const heroSlides = [
 
 export default function HeroCarousel() {
   return (
-    <section className="mb-12">
+    <section className="mb-12 w-full">
       <Carousel
         className="w-full relative"
         opts={{ loop: true }}
@@ -50,7 +50,7 @@ export default function HeroCarousel() {
         <CarouselContent>
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="w-full basis-full">
-              <div className="relative h-[100vh] w-full overflow-hidden rounded-xl">
+              <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden rounded-xl">
                 <Image
                   src={slide.image}
                   alt={slide.title}
@@ -59,7 +59,7 @@ export default function HeroCarousel() {
                   priority={index === 0}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-8 text-white">
+                <div className="absolute bottom-0 left-0 px-4 md:px-12 lg:px-32 py-16 text-white">
                   <h1 className="mb-2 text-4xl font-bold">{slide.title}</h1>
                   <p className="mb-4 max-w-md">{slide.description}</p>
                   <Button size="lg" asChild>
@@ -71,9 +71,8 @@ export default function HeroCarousel() {
           ))}
         </CarouselContent>
 
-        {/* Tombol Navigasi */}
-        <CarouselPrevious className="absolute top-1/2 left-4 transform -translate-y-1/2 z-10 bg-white/50 hover:bg-white/70 rounded-full p-2 md:p-3" />
-        <CarouselNext className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10 bg-white/50 hover:bg-white/70 rounded-full p-2 md:p-3" />
+        <CarouselPrevious className="hidden lg:flex absolute top-1/2 md:left-12 lg:left-32 transform -translate-y-1/2 z-10 bg-white/50 hover:bg-white/70 rounded-full p-2 md:p-3" />
+        <CarouselNext className="hidden lg:flex absolute top-1/2 md:right-12 lg:right-32 transform -translate-y-1/2 z-10 bg-white/50 hover:bg-white/70 rounded-full p-2 md:p-3" />
       </Carousel>
     </section>
   );

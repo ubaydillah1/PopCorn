@@ -70,7 +70,7 @@ const films = [
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto ">
+    <div className="mx-auto w-full">
       <HeroCarousel />
 
       <section id="movies" className="mb-12 px-4 md:px-12 lg:px-32">
@@ -87,16 +87,19 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {films.map((film) => (
-            <Card key={film.id} className="overflow-hidden">
-              <div className="relative aspect-[2/3] w-full">
+            <Card key={film.id} className="overflow-hidden p-0">
+              <div
+                className="relative w-full overflow-hidden"
+                style={{ aspectRatio: "1/1" }}
+              >
                 <Image
                   src={film.poster}
                   alt={film.title}
                   fill
-                  className="object-cover transition-transform duration-300 hover:scale-105"
+                  className="absolute inset-0 object-cover transition-transform duration-300 hover:scale-105 !block"
                 />
               </div>
-              <CardContent className="p-4">
+              <CardContent>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
@@ -132,28 +135,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Coming Soon */}
       <section className="mb-12 px-4 md:px-12 lg:px-32">
         <div className="mb-6">
           <h2 className="text-3xl font-bold">Coming Soon</h2>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {films.slice(0, 4).map((film, index) => (
-            <Card key={`upcoming-${index}`} className="overflow-hidden">
-              <div className="relative aspect-[2/3] w-full">
+            <Card key={`upcoming-${index}`} className="overflow-hidden p-0">
+              <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
                 <Image
                   src={film.poster}
                   alt={`Upcoming: ${film.title}`}
                   fill
                   className="object-cover transition-transform duration-300 hover:scale-105"
                 />
-                <div className="absolute right-2 top-2">
-                  <Badge className="bg-red-500 hover:bg-red-600">
+                <div className="absolute right-3 top-3">
+                  <Badge className="bg-red-500 hover:bg-red-600 text-black font-bold px-3 py-2">
                     Coming Soon
                   </Badge>
                 </div>
               </div>
-              <CardContent className="p-4">
+              <CardContent className="pb-4">
                 <h3 className="mb-1 line-clamp-1 text-lg font-bold">
                   {film.title}
                 </h3>
