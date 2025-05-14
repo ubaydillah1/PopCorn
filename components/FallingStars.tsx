@@ -99,7 +99,7 @@ export function FallingStars() {
           if (star.type === "falling") {
             // Move falling star
             star.y += star.speed;
-            star.x += star.speed * 0.3;
+            star.x += star.speed;
 
             // Simplified drawing for falling stars
             drawFallingStar(ctx, star);
