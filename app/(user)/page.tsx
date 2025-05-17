@@ -87,7 +87,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {films.map((film) => (
-            <Card key={film.id} className="overflow-hidden p-0">
+            <Card key={film.id} className="overflow-hidden pt-0! pb-2">
               <div
                 className="relative w-full overflow-hidden"
                 style={{ aspectRatio: "1/1" }}
@@ -141,7 +141,10 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {films.slice(0, 4).map((film, index) => (
-            <Card key={`upcoming-${index}`} className="overflow-hidden p-0">
+            <Card
+              key={`upcoming-${index}`}
+              className="overflow-hidden pt-0! pb-2"
+            >
               <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
                 <Image
                   src={film.poster}

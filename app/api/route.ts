@@ -1,4 +1,4 @@
-import pool from "@/lib/db";
+import pool from "@/utils/db";
 
 export async function GET() {
   const [rows] = await pool.execute("SELECT * FROM `users`");

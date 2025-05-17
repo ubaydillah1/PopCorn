@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import Link from "next/link";
 
+import { authService } from "@/services/authService";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,34 +26,37 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 
+// Zod Schemas
 const loginSchema = z.object({
-  email: z.string().email({ message: "Email tidak valid." }),
-  password: z.string().min(6, { message: "Password minimal 6 karakter." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters." }),
 });
 
 const registerSchema = loginSchema
   .extend({
-    name: z.string().min(2, { message: "Nama minimal 2 karakter." }),
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     confirmPassword: z
       .string()
-      .min(6, { message: "Konfirmasi minimal 6 karakter." }),
+      .min(6, { message: "Confirmation must be at least 6 characters." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Password tidak cocok.",
+    message: "Passwords do not match.",
   });
 
+// Component props
 type AuthFormProps = {
   type: "login" | "register";
 };
 
 export function AuthForm({ type }: AuthFormProps) {
   const isRegister = type === "register";
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof registerSchema | typeof loginSchema>>({
     resolver: zodResolver(isRegister ? registerSchema : loginSchema),
@@ -63,31 +68,54 @@ export function AuthForm({ type }: AuthFormProps) {
     },
   });
 
-  type LoginSchema = z.infer<typeof loginSchema>;
-  type RegisterSchema = z.infer<typeof registerSchema>;
+  type LoginValues = z.infer<typeof loginSchema>;
+  type RegisterValues = z.infer<typeof registerSchema>;
 
-  function onSubmit(values: LoginSchema | RegisterSchema) {
+  const onSubmit = async (values: LoginValues | RegisterValues) => {
     setIsLoading(true);
+    try {
+      if (type === "register") {
+        const registerValues = values as RegisterValues;
+        await authService.signUp(
+          registerValues.email,
+          registerValues.password,
+          registerValues.name
+        );
 
-    setTimeout(() => {
-      console.log(
-        `${type === "register" ? "Register" : "Login"} berhasil:`,
-        values
-      );
+        
+      } else {
+        const loginValues = values as LoginValues;
+        await authService.signIn(loginValues.email, loginValues.password);
+
+      }
+    } catch (error) {
+      const message = (error as Error).message;
+
+      if (message.toLowerCase().includes("invalid login credentials")) {
+        form.setError("email", { message: "" });
+        form.setError("password", {
+          message: "Email or password may be incorrect.",
+        });
+      } else {
+        form.setError("email", {
+          message: message || "Login/Register failed.",
+        });
+      }
+    } finally {
       setIsLoading(false);
-    }, 1000);
-  }
+    }
+  };
 
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          {isRegister ? "Buat Akun" : "Masuk"}
+          {isRegister ? "Create Account" : "Sign In"}
         </CardTitle>
         <CardDescription className="text-center">
           {isRegister
-            ? "Daftar untuk membuat akun baru"
-            : "Masuk ke akun yang sudah ada"}
+            ? "Register to create a new account"
+            : "Sign in to your existing account"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -99,12 +127,12 @@ export function AuthForm({ type }: AuthFormProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nama</FormLabel>
+                    <FormLabel>Full Name</FormLabel>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <FormControl>
                         <Input
-                          placeholder="Nama Lengkap"
+                          placeholder="Full Name"
                           className="pl-10"
                           {...field}
                         />
@@ -181,7 +209,7 @@ export function AuthForm({ type }: AuthFormProps) {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Konfirmasi Password</FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <FormControl>
@@ -242,10 +270,10 @@ export function AuthForm({ type }: AuthFormProps) {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  {isRegister ? "Mendaftar..." : "Masuk..."}
+                  {isRegister ? "Registering..." : "Signing in..."}
                 </span>
               ) : (
-                <>{isRegister ? "Daftar" : "Masuk"}</>
+                <>{isRegister ? "Sign Up" : "Sign In"}</>
               )}
             </Button>
           </form>
@@ -253,12 +281,12 @@ export function AuthForm({ type }: AuthFormProps) {
       </CardContent>
       <CardFooter className="flex flex-col">
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          {isRegister ? "Sudah punya akun? " : "Belum punya akun? "}
+          {isRegister ? "Already have an account? " : "Don't have an account? "}
           <Link
             href={isRegister ? "/login" : "/register"}
             className="text-primary font-medium hover:underline"
           >
-            {isRegister ? "Masuk" : "Daftar"}
+            {isRegister ? "Sign In" : "Sign Up"}
           </Link>
         </p>
       </CardFooter>
