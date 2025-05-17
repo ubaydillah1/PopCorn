@@ -47,10 +47,10 @@ export function FallingStars() {
     // Initialize both types of stars with balanced counts
     function initializeStars() {
       // Moderately increased star counts from the optimized version
-      const fallingStarCount = Math.min(25, Math.floor(window.innerWidth / 80));
+      const fallingStarCount = Math.min(50, Math.floor(window.innerWidth / 30)); // Lebih banyak & lebih rapat
       const backgroundStarCount = Math.min(
-        200,
-        Math.floor((window.innerWidth * window.innerHeight) / 6000)
+        1000,
+        Math.floor((window.innerWidth * window.innerHeight) / 3000)
       );
 
       // Create falling stars (some already on screen, some above)
@@ -104,8 +104,12 @@ export function FallingStars() {
             // Simplified drawing for falling stars
             drawFallingStar(ctx, star);
 
-            // Reset star if it goes off screen
-            if (star.y > canvas.height || star.x > canvas.width) {
+            const tailBuffer = star.tail * 1.2;
+
+            if (
+              star.y - tailBuffer > canvas.height ||
+              star.x - tailBuffer > canvas.width
+            ) {
               starsRef.current[index] = createFallingStar(false);
             }
           } else {
