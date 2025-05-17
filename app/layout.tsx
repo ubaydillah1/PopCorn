@@ -29,13 +29,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <footer className="border-t py-6">
-            <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-              <p className="text-center text-sm text-muted-foreground w-full">
-                &copy; 2025 PopCorn. All rights reserved.
-              </p>
-            </div>
-          </footer>
         </ThemeProvider>
       </body>
     </html>
