@@ -28,8 +28,8 @@ export async function POST(req: Request) {
     }
 
     await pool.execute(
-      "INSERT INTO users (id, email, name, role, email_verified) VALUES (?, ?, ?, ?, ?)",
-      [user.id, user.email, name, "USER", false]
+      "INSERT INTO users (id, email, name, role) VALUES (?, ?, ?, ?)",
+      [user.id, user.email, name, "USER"]
     );
 
     return NextResponse.json({ success: true });

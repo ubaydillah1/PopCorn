@@ -18,17 +18,29 @@ export const authService = {
   },
 
   async signIn(email: string, password: string) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error("Login failed");
+
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ id: data.user.id }),
     });
 
     const result = await res.json();
 
-    if (!res.ok) throw new Error(result.error || "Login failed");
+    if (!res.ok) throw new Error(result.error || "Failed to get user role");
 
-    return result.user;
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      role: result.role,
+    };
   },
 
   async signOut() {

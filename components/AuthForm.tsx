@@ -27,7 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UserData } from "@/interfaces/userInterface";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -87,7 +86,7 @@ export function AuthForm({ type }: AuthFormProps) {
         );
       } else {
         const loginValues = values as LoginValues;
-        const user: UserData = await authService.signIn(
+        const user = await authService.signIn(
           loginValues.email,
           loginValues.password
         );
