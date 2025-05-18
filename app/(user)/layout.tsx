@@ -47,10 +47,10 @@ export default function UserLayout({
                 Home
               </Link>
               <Link
-                href="/riwayat"
+                href="/tickets"
                 className="text-sm font-medium transition-colors hover:text-primary"
               >
-                Booking History
+                My Tickets
               </Link>
             </nav>
           </div>
@@ -85,7 +85,7 @@ export default function UserLayout({
                   <Link href="/login">Sign In</Link>
                 </Button>
                 <Button asChild variant="secondary" size="sm">
-                  <Link href="/register">Sign Up</Link>
+                  <Link href="/register">Get Free Ticket</Link>
                 </Button>
               </div>
             )}
