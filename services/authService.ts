@@ -18,13 +18,17 @@ export const authService = {
   },
 
   async signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (error) throw new Error(error.message);
-    return data;
+    const result = await res.json();
+
+    if (!res.ok) throw new Error(result.error || "Login failed");
+
+    return result.user;
   },
 
   async signOut() {

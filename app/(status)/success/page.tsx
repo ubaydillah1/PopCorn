@@ -8,7 +8,7 @@ export default function SuccessAnimation() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/");
+    router.push("/login");
   }, [router]);
 
   return (

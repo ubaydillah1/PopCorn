@@ -1,4 +1,3 @@
-// Tambahkan di bagian paling atas
 "use client";
 
 import { useState } from "react";
@@ -28,6 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { UserData } from "@/interfaces/userInterface";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -87,9 +87,16 @@ export function AuthForm({ type }: AuthFormProps) {
         );
       } else {
         const loginValues = values as LoginValues;
-        await authService.signIn(loginValues.email, loginValues.password);
+        const user: UserData = await authService.signIn(
+          loginValues.email,
+          loginValues.password
+        );
 
-        router.push("/");
+        if (user.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/");
+        }
       }
     } catch (error) {
       const message = (error as Error).message;
