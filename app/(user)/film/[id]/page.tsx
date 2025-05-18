@@ -1,5 +1,3 @@
-"use client";
-
 import React, { use } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -16,7 +14,7 @@ function RecommendedFilmCard({
   film,
   index,
 }: {
-  film: typeof films[number];
+  film: (typeof films)[number];
   index: number;
 }) {
   const formattedDate = React.useMemo(() => {
@@ -30,7 +28,12 @@ function RecommendedFilmCard({
       key={`recommendation-${film.id}`}
       className="relative flex-shrink-0 snap-start w-[260px] sm:w-[300px] md:w-[340px] h-[180px] overflow-hidden rounded-lg "
     >
-      <Image src={film.poster} alt={`Recommended: ${film.title}`} fill className="object-cover" />
+      <Image
+        src={film.poster}
+        alt={`Recommended: ${film.title}`}
+        fill
+        className="object-cover"
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
       <CardContent className="absolute bottom-0 text-white w-full p-3 z-10">
         <h3 className="text-base font-bold line-clamp-2">{film.title}</h3>
@@ -50,7 +53,10 @@ export default function FilmDetailPage({ params }: FilmDetailPageProps) {
   if (!film) return notFound();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const recommendedFilms = React.useMemo(() => films.filter((f) => f.id !== film.id), [film.id]);
+  const recommendedFilms = React.useMemo(
+    () => films.filter((f) => f.id !== film.id),
+    [film.id]
+  );
 
   return (
     <div className="relative w-full ">
@@ -58,12 +64,13 @@ export default function FilmDetailPage({ params }: FilmDetailPageProps) {
         title={film.title}
         backdropPath={film.poster}
         posterPath={film.poster}
-        rating={film.rating}
+        rating={String(film.rating)}
         duration={film.duration}
         releaseDate={film.releaseDate}
         genres={film.genres}
         author={film.author}
         studio={film.studio}
+        synopsis={film.synopsis}
       />
 
       <section className="px-4 md:px-12 lg:px-32 pb-12 ">

@@ -6,12 +6,14 @@ export const films = [
     id: 1,
     title: "Avengers: Endgame",
     poster: samplePoster,
-    rating: 4.8,
+    rating: "SU",
     duration: "3h 2m",
     releaseDate: "2023-05-15",
     genres: ["Action", "Adventure", "Sci-Fi"],
     author: { id: 1, name: "Christopher Markus" },
     studio: { id: 1, name: "Marvel Studios" },
+    synopsis:
+      "The remaining Avengers must assemble once more in a final stand to undo the catastrophic events caused by Thanos and restore balance to the universe.",
   },
   {
     id: 2,
@@ -23,6 +25,8 @@ export const films = [
     genres: ["Drama"],
     author: { id: 2, name: "Frank Darabont" },
     studio: { id: 2, name: "Castle Rock" },
+    synopsis:
+      "A man wrongly imprisoned for murder finds hope, friendship, and a new purpose in the walls of Shawshank prison over the span of decades.",
   },
   {
     id: 3,
@@ -34,6 +38,8 @@ export const films = [
     genres: ["Action", "Sci-Fi", "Thriller"],
     author: { id: 3, name: "Christopher Nolan" },
     studio: { id: 3, name: "Warner Bros." },
+    synopsis:
+      "A skilled thief is offered a chance to have his criminal record erased if he can successfully plant an idea into a target’s subconscious.",
   },
   {
     id: 4,
@@ -45,6 +51,8 @@ export const films = [
     genres: ["Action", "Crime", "Drama"],
     author: { id: 4, name: "Jonathan Nolan" },
     studio: { id: 3, name: "Warner Bros." },
+    synopsis:
+      "Batman faces his greatest psychological and physical test yet as he confronts the chaotic and calculating criminal mastermind known as the Joker.",
   },
   {
     id: 5,
@@ -56,6 +64,8 @@ export const films = [
     genres: ["Crime", "Drama"],
     author: { id: 5, name: "Quentin Tarantino" },
     studio: { id: 4, name: "Miramax Films" },
+    synopsis:
+      "A series of interwoven stories involving hitmen, gangsters, and ordinary people unfolds in a wildly nonlinear fashion full of dark humor and unexpected twists.",
   },
   {
     id: 6,
@@ -67,5 +77,7 @@ export const films = [
     genres: ["Drama", "Romance"],
     author: { id: 6, name: "Eric Roth" },
     studio: { id: 5, name: "Paramount Pictures" },
+    synopsis:
+      "Forrest Gump, a man with a kind heart and a low IQ, unwittingly influences major historical events while simply trying to find his way in life and win back his childhood love.",
   },
 ];

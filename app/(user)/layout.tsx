@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ModeToggle";
 import { supabase } from "@/utils/supabase/client";
 import { authService } from "@/services/authService";
 import {
@@ -57,7 +56,6 @@ export default function UserLayout({
           </div>
 
           <div className="flex items-center gap-2">
-            <ModeToggle />
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -82,9 +80,14 @@ export default function UserLayout({
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="default" size="sm">
-                <Link href="/login">Login</Link>
-              </Button>
+              <div className="flex gap-4">
+                <Button asChild variant="default" size="sm">
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild variant="secondary" size="sm">
+                  <Link href="/register">Sign Up</Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>

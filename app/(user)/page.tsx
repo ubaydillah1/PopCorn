@@ -1,13 +1,11 @@
-// pages/index.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, Clock, Star } from "lucide-react";
+import { CalendarDays, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroCarousel from "@/components/HeroSlides";
 
-// Sample poster URLs
 const samplePoster =
   "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?w=400&h=600&fit=crop";
 
@@ -16,7 +14,7 @@ const films = [
     id: 1,
     title: "Avengers: Endgame",
     poster: samplePoster,
-    rating: 4.8,
+    ageRating: 4.8,
     duration: "3h 2m",
     releaseDate: "2023-05-15",
     genres: ["Action", "Adventure", "Sci-Fi"],
@@ -25,7 +23,7 @@ const films = [
     id: 2,
     title: "The Shawshank Redemption",
     poster: samplePoster,
-    rating: 4.9,
+    ageRating: 4.9,
     duration: "2h 22m",
     releaseDate: "2023-06-10",
     genres: ["Drama"],
@@ -34,7 +32,7 @@ const films = [
     id: 3,
     title: "Inception",
     poster: samplePoster,
-    rating: 4.7,
+    ageRating: 4.7,
     duration: "2h 28m",
     releaseDate: "2023-07-05",
     genres: ["Action", "Sci-Fi", "Thriller"],
@@ -43,7 +41,7 @@ const films = [
     id: 4,
     title: "The Dark Knight",
     poster: samplePoster,
-    rating: 4.9,
+    ageRating: 4.9,
     duration: "2h 32m",
     releaseDate: "2023-08-20",
     genres: ["Action", "Crime", "Drama"],
@@ -52,7 +50,7 @@ const films = [
     id: 5,
     title: "Pulp Fiction",
     poster: samplePoster,
-    rating: 4.8,
+    ageRating: 4.8,
     duration: "2h 34m",
     releaseDate: "2023-09-12",
     genres: ["Crime", "Drama"],
@@ -61,7 +59,7 @@ const films = [
     id: 6,
     title: "Forrest Gump",
     poster: samplePoster,
-    rating: 4.7,
+    ageRating: 4.7,
     duration: "2h 22m",
     releaseDate: "2023-10-05",
     genres: ["Drama", "Romance"],
@@ -101,9 +99,8 @@ export default function HomePage() {
               </div>
               <CardContent>
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                    <span>{film.rating}</span>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Badge variant="destructive">{film.ageRating}</Badge>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />

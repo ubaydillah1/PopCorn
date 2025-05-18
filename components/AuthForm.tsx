@@ -1,7 +1,9 @@
+// Tambahkan di bagian paling atas
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
@@ -27,7 +29,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// Zod Schemas
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z
@@ -47,7 +48,6 @@ const registerSchema = loginSchema
     message: "Passwords do not match.",
   });
 
-// Component props
 type AuthFormProps = {
   type: "login" | "register";
 };
@@ -57,6 +57,7 @@ export function AuthForm({ type }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof registerSchema | typeof loginSchema>>({
     resolver: zodResolver(isRegister ? registerSchema : loginSchema),
@@ -74,22 +75,33 @@ export function AuthForm({ type }: AuthFormProps) {
   const onSubmit = async (values: LoginValues | RegisterValues) => {
     setIsLoading(true);
     try {
-      if (type === "register") {
+      if (isRegister) {
         const registerValues = values as RegisterValues;
         await authService.signUp(
           registerValues.email,
           registerValues.password,
           registerValues.name
         );
-
-        
+        router.push(
+          `/confirm-email?email=${encodeURIComponent(registerValues.email)}`
+        );
       } else {
         const loginValues = values as LoginValues;
         await authService.signIn(loginValues.email, loginValues.password);
 
+        router.push("/");
       }
     } catch (error) {
       const message = (error as Error).message;
+
+      if (message.toLowerCase().includes("email not confirmed")) {
+        router.push(
+          `/confirm-email?email=${encodeURIComponent(
+            (values as LoginValues).email
+          )}`
+        );
+        return;
+      }
 
       if (message.toLowerCase().includes("invalid login credentials")) {
         form.setError("email", { message: "" });
