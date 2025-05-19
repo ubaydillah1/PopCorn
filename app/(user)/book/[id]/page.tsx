@@ -6,7 +6,6 @@ import { Hero } from "@/components/ui/hero";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-// Dummy data
 const dummyFilms = [
   {
     id: "1",
@@ -21,11 +20,23 @@ const dummyFilms = [
     genres: ["Action", "Adventure", "Sci-Fi"],
     author: { id: 1, name: "Anthony Russo" },
     studio: { id: 1, name: "Marvel Studios" },
-    price: 10, // in dollars
-    showtimes: [
-      "2025-05-20T13:00:00",
-      "2025-05-20T17:00:00",
-      "2025-05-20T20:30:00",
+    price: 10,
+    schedules: [
+      {
+        id: "s1",
+        room: "Studio 1",
+        showTime: "2025-05-20T13:00:00",
+      },
+      {
+        id: "s2",
+        room: "Studio 2",
+        showTime: "2025-05-20T13:00:00",
+      },
+      {
+        id: "s3",
+        room: "Studio 1",
+        showTime: "2025-05-20T17:00:00",
+      },
     ],
   },
 ];
@@ -37,13 +48,14 @@ const allSeats = rows.flatMap((row) => cols.map((col) => `${row}${col}`));
 export default function BookingPage() {
   const { id } = useParams();
   const film = dummyFilms.find((f) => f.id === id);
-
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [selectedShowtime, setSelectedShowtime] = useState<string>(
-    "2025-05-20T13:00:00"
-  );
+  const [selectedScheduleId, setSelectedScheduleId] = useState<string>("");
 
   if (!film) return <div className="p-10 text-center">Film not found.</div>;
+
+  const selectedSchedule = film.schedules.find(
+    (s) => s.id === selectedScheduleId
+  );
 
   const toggleSeat = (seat: string) => {
     setSelectedSeats((prev) =>
@@ -73,24 +85,33 @@ export default function BookingPage() {
         <h2 className="text-xl font-semibold mb-4 text-center">
           Choose Showtime
         </h2>
-        <div className="flex gap-3 flex-wrap mb-6">
-          {film.showtimes.map((time) => (
+
+        <div className="flex gap-3 flex-wrap mb-6 justify-center">
+          {film.schedules.map((schedule) => (
             <Button
-              key={time}
-              variant={selectedShowtime === time ? "default" : "outline"}
-              onClick={() => setSelectedShowtime(time)}
+              key={schedule.id}
+              variant={
+                selectedScheduleId === schedule.id ? "default" : "outline"
+              }
+              onClick={() => {
+                setSelectedScheduleId(schedule.id);
+                setSelectedSeats([]); // reset seats on showtime change
+              }}
             >
-              {new Date(time).toLocaleTimeString("en-US", {
+              {new Date(schedule.showTime).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              })}{" "}
+              ({schedule.room})
             </Button>
           ))}
         </div>
 
-        {selectedShowtime && (
+        {selectedSchedule && (
           <>
-            <h3 className="text-lg font-semibold mb-3">Choose Your Seats</h3>
+            <h3 className="text-lg font-semibold mb-3 text-center">
+              Choose Your Seats
+            </h3>
             <div className="grid grid-cols-5 gap-4 max-w-md mx-auto mb-6">
               {allSeats.map((seat) => {
                 const isSelected = selectedSeats.includes(seat);
@@ -112,15 +133,15 @@ export default function BookingPage() {
           </>
         )}
 
-        {selectedShowtime && (
+        {selectedSchedule && (
           <div className="text-center">
             <p className="text-muted-foreground mb-2">
               Selected Seats:{" "}
               {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
             </p>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-2">
               Showtime:{" "}
-              {new Date(selectedShowtime).toLocaleString("en-US", {
+              {new Date(selectedSchedule.showTime).toLocaleString("en-US", {
                 weekday: "long",
                 hour: "2-digit",
                 minute: "2-digit",
@@ -128,8 +149,11 @@ export default function BookingPage() {
                 month: "short",
               })}
             </p>
+            <p className="text-muted-foreground mb-4">
+              Studio: {selectedSchedule.room}
+            </p>
             <Button disabled={selectedSeats.length === 0}>
-              Confirm Booking ($ {totalPrice})
+              Confirm Booking (${totalPrice})
             </Button>
           </div>
         )}
