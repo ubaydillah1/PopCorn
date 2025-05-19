@@ -22,6 +22,7 @@ export interface HeroProps {
   synopsis: string;
   className?: string;
   showBookButton?: boolean;
+  onBookButtonClick?: () => void;
 }
 
 function PosterImage({
@@ -81,7 +82,6 @@ function HeroContent({
   studio,
   synopsis,
   className,
-  showBookButton,
 }: Omit<HeroProps, "posterPath" | "backdropPath"> & { className?: string }) {
   return (
     <div data-slot="hero-content" className={cn("text-white", className)}>
@@ -123,12 +123,6 @@ function HeroContent({
           </Link>
         </div>
       </div>
-
-      {showBookButton && (
-        <Button asChild className="w-full md:w-auto">
-          <Link href="#">Book Ticket</Link>
-        </Button>
-      )}
     </div>
   );
 }
@@ -145,7 +139,8 @@ function Hero({
   studio,
   synopsis,
   className,
-  showBookButton = true, // default true
+  showBookButton = true,
+  onBookButtonClick,
 }: HeroProps) {
   return (
     <section
@@ -165,18 +160,24 @@ function Hero({
         <div className="absolute inset-0 bg-black opacity-40" />
         <div className="relative max-w-7xl mx-auto px-4 py-10 md:py-10 flex flex-col md:flex-row justify-center items-center h-full">
           <PosterImage src={posterPath} alt={title} className="mb-6 md:mb-0" />
-          <HeroContent
-            title={title}
-            rating={rating}
-            duration={duration}
-            releaseDate={releaseDate}
-            genres={genres}
-            author={author}
-            studio={studio}
-            synopsis={synopsis}
-            showBookButton={showBookButton}
-            className="text-center md:text-left md:ml-8"
-          />
+          <div className="flex flex-col md:ml-8 items-center md:items-start">
+            <HeroContent
+              title={title}
+              rating={rating}
+              duration={duration}
+              releaseDate={releaseDate}
+              genres={genres}
+              author={author}
+              studio={studio}
+              synopsis={synopsis}
+              className="text-center md:text-left"
+            />
+            {showBookButton && onBookButtonClick && (
+              <Button onClick={onBookButtonClick} className="w-full md:w-auto">
+                Book Ticket
+              </Button>
+            )}
+          </div>
         </div>
       </Parallax>
     </section>
