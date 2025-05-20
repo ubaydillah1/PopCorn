@@ -2,53 +2,25 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Parallax } from "react-parallax";
 import { Clock, CalendarDays, UserIcon, Building2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export interface HeroProps {
   title: string;
-  backdropPath: string;
   posterPath: string;
   rating: string;
   duration: string;
   releaseDate: string;
-  genres: string[];
-  author: { id: number; name: string };
-  studio: { id: number; name: string };
+  genres: string[] | string;
+  author_name: string;
+  studio_name: string;
   synopsis: string;
   className?: string;
   showBookButton?: boolean;
   onBookButtonClick?: () => void;
-}
-
-function PosterImage({
-  src,
-  alt,
-  className,
-  ...props
-}: React.ComponentProps<typeof Image>) {
-  return (
-    <div
-      data-slot="poster"
-      className={cn(
-        "w-48 md:w-64 shadow-lg rounded-md overflow-hidden mr-0 md:mr-8",
-        className
-      )}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={300}
-        height={450}
-        className="object-cover"
-        {...props}
-      />
-    </div>
-  );
 }
 
 function HeroInfoItem({
@@ -78,13 +50,17 @@ function HeroContent({
   duration,
   releaseDate,
   genres,
-  author,
-  studio,
+  author_name,
+  studio_name,
   synopsis,
   className,
-}: Omit<HeroProps, "posterPath" | "backdropPath"> & { className?: string }) {
+}: Omit<HeroProps, "posterPath"> & { className?: string }) {
+  const genreList = Array.isArray(genres)
+    ? genres
+    : genres.split(",").map((g) => g.trim());
+
   return (
-    <div data-slot="hero-content" className={cn("text-white", className)}>
+    <div className={cn("text-white", className)}>
       <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
 
       <div className="flex gap-4 mb-2 flex-wrap">
@@ -94,7 +70,7 @@ function HeroContent({
       </div>
 
       <div className="mb-3 flex flex-wrap gap-2">
-        {genres.map((genre) => (
+        {genreList.map((genre) => (
           <Badge key={genre} variant="secondary">
             {genre}
           </Badge>
@@ -106,21 +82,11 @@ function HeroContent({
       <div className="text-sm text-gray-300 mb-4 flex gap-6 flex-wrap">
         <div className="flex items-center gap-2">
           <UserIcon className="w-4 h-4 text-white" />
-          <Link
-            href={`/author/${author.id}`}
-            className="text-white hover:text-blue-400 transition-colors font-medium hover:font-semibold"
-          >
-            {author.name}
-          </Link>
+          <span className="text-white font-medium">{author_name}</span>
         </div>
         <div className="flex items-center gap-2">
           <Building2Icon className="w-4 h-4 text-white" />
-          <Link
-            href={`/studio/${studio.id}`}
-            className="text-white hover:text-blue-400 transition-colors font-medium hover:font-semibold"
-          >
-            {studio.name}
-          </Link>
+          <span className="text-white font-medium">{studio_name}</span>
         </div>
       </div>
     </div>
@@ -129,59 +95,67 @@ function HeroContent({
 
 function Hero({
   title,
-  backdropPath,
   posterPath,
   rating,
   duration,
   releaseDate,
   genres,
-  author,
-  studio,
+  author_name,
+  studio_name,
   synopsis,
   className,
   showBookButton = true,
   onBookButtonClick,
 }: HeroProps) {
+  const formattedDate = new Date(releaseDate).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
     <section
-      data-slot="hero"
-      className={cn("relative w-full h-[600px] md:h-[500px]", className)}
+      className={cn(
+        "relative w-full flex items-center justify-center my-[70px]",
+        className
+      )}
     >
-      <Parallax
-        blur={5}
-        bgImage={backdropPath}
-        bgImageAlt={title}
-        strength={200}
-        bgImageStyle={{
-          opacity: 0.6,
-          objectFit: "cover",
-        }}
-      >
-        <div className="absolute inset-0 bg-black opacity-40" />
-        <div className="relative max-w-7xl mx-auto px-4 py-10 md:py-10 flex flex-col md:flex-row justify-center items-center h-full">
-          <PosterImage src={posterPath} alt={title} className="mb-6 md:mb-0" />
-          <div className="flex flex-col md:ml-8 items-center md:items-start">
+      <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl w-full max-w-5xl">
+        <CardContent className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr] items-start">
+          <div className="relative w-full h-full rounded-md overflow-hidden bg-blue-50 shadow-md">
+            <Image
+              src={posterPath}
+              alt={posterPath}
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          <div className="flex flex-col md:ml-8 items-center md:items-start flex-3 col-span-2 ">
             <HeroContent
               title={title}
               rating={rating}
               duration={duration}
-              releaseDate={releaseDate}
+              releaseDate={formattedDate}
               genres={genres}
-              author={author}
-              studio={studio}
+              author_name={author_name}
+              studio_name={studio_name}
               synopsis={synopsis}
               className="text-center md:text-left"
             />
             {showBookButton && onBookButtonClick && (
-              <Button onClick={onBookButtonClick} className="w-full md:w-auto">
+              <Button
+                onClick={onBookButtonClick}
+                className="w-full md:w-auto mt-2"
+              >
                 Book Ticket
               </Button>
             )}
           </div>
-        </div>
-      </Parallax>
+        </CardContent>
+      </Card>
     </section>
   );
 }
 
-export { Hero, HeroContent, PosterImage };
+export { Hero };

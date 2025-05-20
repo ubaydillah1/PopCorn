@@ -10,9 +10,9 @@ interface FilmCardProps {
     id: number;
     title: string;
     poster: string;
-    ageRating: number;
+    age_rating: string | number;
     duration: string;
-    releaseDate: string;
+    release_date: string;
     genres: string[];
   };
   variant?: "now-playing" | "upcoming";
@@ -24,15 +24,21 @@ export default function FilmCard({
   variant = "now-playing",
   index = 0,
 }: FilmCardProps) {
-  const adjustedDate =
-    variant === "upcoming"
-      ? new Date(
-          new Date(film.releaseDate).getTime() +
-            1000 * 60 * 60 * 24 * 30 * (index + 1)
-        )
-          .toISOString()
-          .split("T")[0]
-      : film.releaseDate;
+  const getAdjustedDate = () => {
+    if (!film.release_date) return "TBA";
+    const baseDate = new Date(film.release_date);
+    if (isNaN(baseDate.getTime())) return "TBA";
+
+    if (variant === "upcoming") {
+      const offsetTime = 1000 * 60 * 60 * 24 * 30 * (index + 1);
+      const adjusted = new Date(baseDate.getTime() + offsetTime);
+      return adjusted.toISOString().split("T")[0];
+    }
+
+    return baseDate.toISOString().split("T")[0];
+  };
+
+  const adjustedDate = getAdjustedDate();
 
   return (
     <Card className="overflow-hidden pt-0! pb-2">
@@ -58,7 +64,7 @@ export default function FilmCard({
       <CardContent className="pb-4">
         {variant === "now-playing" && (
           <div className="mb-2 flex items-center justify-between text-sm">
-            <Badge variant="destructive">{film.ageRating}</Badge>
+            <Badge variant="destructive">{film.age_rating}</Badge>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               <span>{film.duration}</span>
@@ -73,7 +79,7 @@ export default function FilmCard({
           <span>{adjustedDate}</span>
         </div>
 
-        {variant === "now-playing" && (
+        {film.genres?.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {film.genres.map((genre) => (
               <Badge key={genre} variant="secondary">
