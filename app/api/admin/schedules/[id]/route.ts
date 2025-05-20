@@ -4,14 +4,15 @@ import pool from "@/utils/db";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await req.json();
     const { filmId, roomId, showTime, price } = body;
+    const { id } = await params;
 
     await pool.query("CALL editSchedule(?, ?, ?, ?, ?)", [
-      parseInt(params.id),
+      parseInt(id),
       filmId,
       roomId,
       showTime,
@@ -29,10 +30,11 @@ export async function PUT(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await pool.query("CALL deleteSchedule(?)", [parseInt(params.id)]);
+    const { id } = await params;
+    await pool.query("CALL deleteSchedule(?)", [parseInt(id)]);
     return NextResponse.json({ message: "Schedule deleted successfully" });
   } catch (error: any) {
     return NextResponse.json(

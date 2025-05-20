@@ -7,15 +7,25 @@ export async function GET() {
     const [authors] = await pool.query(
       "SELECT id, author_name AS name FROM authors"
     );
+
     const [studios] = await pool.query(
       "SELECT id, studio_name AS name FROM studios"
     );
+
     const [genres] = await pool.query(
       "SELECT id, genre_name AS name FROM genres"
     );
 
-    return NextResponse.json({ authors, studios, genres }, { status: 200 });
+    const [rooms] = await pool.query("SELECT id, room_name FROM rooms");
+
+    return NextResponse.json(
+      { authors, studios, genres, rooms },
+      { status: 200 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

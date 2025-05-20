@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 
 const adminNav = [
@@ -19,6 +20,39 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/user?id=${user.id}`);
+        const result = await res.json();
+
+        if (result.role !== "ADMIN") {
+          router.replace("/");
+          return;
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        router.replace("/");
+      }
+    };
+
+    checkAdmin();
+  }, [router]);
+
+  if (isLoading) return <div className="p-10">Checking access...</div>;
 
   return (
     <div className="flex min-h-screen">
@@ -42,7 +76,6 @@ export default function AdminLayout({
         </nav>
       </aside>
 
-      {/* Content */}
       <main className="flex-1 p-6 md:p-10 bg-muted/50">{children}</main>
     </div>
   );

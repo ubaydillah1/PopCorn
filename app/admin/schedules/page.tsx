@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,41 +18,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CalendarClock } from "lucide-react";
 
-type Schedule = {
-  id: number;
-  film: string;
-  room: string;
-  showTime: string;
-  price: number;
-};
-
-const dummySchedules: Schedule[] = [
-  {
-    id: 1,
-    film: "Inception",
-    room: "Studio 1",
-    showTime: "2025-05-20T18:30",
-    price: 50000,
-  },
-];
-
-const films = ["Inception", "Avengers", "The Dark Knight"];
-const rooms = ["Studio 1", "Studio 2", "IMAX Room"];
+const API_BASE = "http://localhost:3000/api/admin";
 
 export default function AdminSchedulesPage() {
-  const [schedules, setSchedules] = useState<Schedule[]>(dummySchedules);
+  const [schedules, setSchedules] = useState([]);
+  const [films, setFilms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    film: "",
-    room: "",
+    filmId: 0,
+    roomId: 0,
     showTimes: [""],
     price: 0,
   });
 
+  useEffect(() => {
+    fetchSchedules();
+    fetchFilms();
+    fetchRooms();
+  }, []);
+
+  const fetchSchedules = async () => {
+    const res = await fetch(`${API_BASE}/schedules`);
+    const json = await res.json();
+    setSchedules(json.data);
+  };
+
+  const fetchFilms = async () => {
+    const res = await fetch(`${API_BASE}/films`);
+    const json = await res.json();
+    setFilms(json.data);
+  };
+
+  const fetchRooms = async () => {
+    const res = await fetch(`${API_BASE}/metadata`);
+    const json = await res.json();
+    setRooms(json.rooms);
+  };
+
   const resetForm = () => {
-    setFormData({ film: "", room: "", showTimes: [""], price: 0 });
+    setFormData({ filmId: 0, roomId: 0, showTimes: [""], price: 0 });
     setEditId(null);
   };
 
@@ -74,13 +83,15 @@ export default function AdminSchedulesPage() {
     setFormData((prev) => ({ ...prev, showTimes: updated }));
   };
 
-  const handleOpen = (schedule?: Schedule) => {
+  const handleOpen = (schedule?: any) => {
     if (schedule) {
-      setEditId(schedule.id);
+      setEditId(schedule.schedule_id);
+      const selectedFilm = films.find((f) => f.title === schedule.film);
+      const selectedRoom = rooms.find((r) => r.room_name === schedule.room);
       setFormData({
-        film: schedule.film,
-        room: schedule.room,
-        showTimes: [schedule.showTime],
+        filmId: selectedFilm?.id || 0,
+        roomId: selectedRoom?.id || 0,
+        showTimes: [schedule.show_time?.slice(0, 16)],
         price: schedule.price,
       });
     } else {
@@ -89,41 +100,64 @@ export default function AdminSchedulesPage() {
     setIsOpen(true);
   };
 
-  const handleSubmit = () => {
-    const validTimes = formData.showTimes.filter((time) => time !== "");
-
-    if (editId !== null) {
-      // Edit existing schedule (only support 1 showTime during edit)
-      const updated = schedules.map((s) =>
-        s.id === editId
-          ? {
-              ...s,
-              film: formData.film,
-              room: formData.room,
-              showTime: validTimes[0],
-              price: formData.price,
-            }
-          : s
-      );
-      setSchedules(updated);
-    } else {
-      // Add new schedules
-      const newSchedules = validTimes.map((time, i) => ({
-        id: schedules.length + i + 1,
-        film: formData.film,
-        room: formData.room,
-        showTime: time,
-        price: formData.price,
-      }));
-      setSchedules((prev) => [...prev, ...newSchedules]);
+  const handleSubmit = async () => {
+    const validTimes = formData.showTimes.filter((time) => time);
+    if (
+      !formData.filmId ||
+      !formData.roomId ||
+      validTimes.length === 0 ||
+      formData.price <= 0
+    ) {
+      alert("Please fill in all fields correctly.");
+      return;
     }
 
-    setIsOpen(false);
-    resetForm();
+    try {
+      if (editId !== null) {
+        const res = await fetch(`${API_BASE}/schedules/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filmId: formData.filmId,
+            roomId: formData.roomId,
+            showTime: validTimes[0],
+            price: formData.price,
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to update schedule");
+      } else {
+        for (const time of validTimes) {
+          const res = await fetch(`${API_BASE}/schedules`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              filmId: formData.filmId,
+              roomId: formData.roomId,
+              showTime: time,
+              price: formData.price,
+            }),
+          });
+          if (!res.ok) throw new Error("Failed to add schedule");
+        }
+      }
+      fetchSchedules();
+      setIsOpen(false);
+      resetForm();
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== id));
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/schedules/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete schedule");
+      fetchSchedules();
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   return (
@@ -133,46 +167,58 @@ export default function AdminSchedulesPage() {
         <Button onClick={() => handleOpen()}>Add New Schedule</Button>
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-muted/50">
-            <tr>
-              <th className="p-4 text-left">Film</th>
-              <th className="p-4 text-left">Room</th>
-              <th className="p-4 text-left">Show Time</th>
-              <th className="p-4 text-left">Price</th>
-              <th className="p-4 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schedules.map((s) => (
-              <tr key={s.id} className="border-b">
-                <td className="p-4">{s.film}</td>
-                <td className="p-4">{s.room}</td>
-                <td className="p-4">{new Date(s.showTime).toLocaleString()}</td>
-                <td className="p-4">Rp {s.price.toLocaleString()}</td>
-                <td className="p-4">
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleOpen(s)}
-                      variant={"outline"}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(s.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </td>
+      <div className="rounded-xl border bg-card shadow-sm overflow-x-auto min-h-[100px]">
+        {schedules.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 p-10 text-center text-muted-foreground">
+            <CalendarClock className="w-12 h-12 opacity-40" />
+            <h3 className="text-lg font-semibold">No schedules found</h3>
+            <p className="text-sm text-muted-foreground">
+              Start by adding a new schedule for a film.
+            </p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="border-b bg-muted/50">
+              <tr>
+                <th className="p-4 text-left">Film</th>
+                <th className="p-4 text-left">Room</th>
+                <th className="p-4 text-left">Show Time</th>
+                <th className="p-4 text-left">Price</th>
+                <th className="p-4 text-left">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {schedules.map((s: any) => (
+                <tr key={s.schedule_id} className="border-b">
+                  <td className="p-4">{s.film}</td>
+                  <td className="p-4">{s.room}</td>
+                  <td className="p-4">
+                    {new Date(s.show_time).toLocaleString()}
+                  </td>
+                  <td className="p-4">$ {s.price.toLocaleString()}</td>
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpen(s)}
+                        variant="outline"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(s.schedule_id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -187,9 +233,9 @@ export default function AdminSchedulesPage() {
             <div className="space-y-2">
               <Label>Film</Label>
               <Select
-                value={formData.film}
+                value={String(formData.filmId)}
                 onValueChange={(val) =>
-                  setFormData((prev) => ({ ...prev, film: val }))
+                  setFormData((prev) => ({ ...prev, filmId: parseInt(val) }))
                 }
               >
                 <SelectTrigger>
@@ -197,8 +243,8 @@ export default function AdminSchedulesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {films.map((f) => (
-                    <SelectItem key={f} value={f}>
-                      {f}
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -208,9 +254,9 @@ export default function AdminSchedulesPage() {
             <div className="space-y-2">
               <Label>Room</Label>
               <Select
-                value={formData.room}
+                value={String(formData.roomId)}
                 onValueChange={(val) =>
-                  setFormData((prev) => ({ ...prev, room: val }))
+                  setFormData((prev) => ({ ...prev, roomId: parseInt(val) }))
                 }
               >
                 <SelectTrigger>
@@ -218,8 +264,8 @@ export default function AdminSchedulesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {rooms.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {r}
+                    <SelectItem key={r.id} value={String(r.id)}>
+                      {r.room_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
