@@ -1,8 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import UserNav from "@/components/UserNav";
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import clsx from "clsx"; // opsional, atau pakai ternary biasa
 
 export default function UserLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-12 lg:px-32">
@@ -14,13 +20,19 @@ export default function UserLayout({ children }: { children: ReactNode }) {
             <nav className="hidden gap-6 md:flex">
               <Link
                 href="/"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={clsx(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  pathname === "/" && "text-primary"
+                )}
               >
                 Home
               </Link>
               <Link
                 href="/tickets"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={clsx(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  pathname === "/tickets" && "text-primary"
+                )}
               >
                 My Tickets
               </Link>

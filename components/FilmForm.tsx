@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Film, Metadata } from "@/types/film";
+import { X } from "lucide-react";
 
 interface FilmFormProps {
   open: boolean;
@@ -45,6 +47,8 @@ export default function FilmForm({
   const [studioId, setStudioId] = useState<number>();
   const [genreIds, setGenreIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterPreviewUrl, setPosterPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const formattedDate = formData.releaseDate
@@ -65,6 +69,10 @@ export default function FilmForm({
     setAuthorId(author?.id);
     setStudioId(studio?.id);
     setGenreIds(genres.map((g) => g.id));
+
+    if (formData.posterPath) {
+      setPosterPreviewUrl(formData.posterPath);
+    }
   }, [formData, metadata]);
 
   const toggleGenre = (id: number) => {
@@ -79,6 +87,23 @@ export default function FilmForm({
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handlePosterSelect = (file: File) => {
+    const isImage = file.type.startsWith("image/");
+    const isTooBig = file.size > 3 * 1024 * 1024;
+
+    if (!isImage) {
+      alert("File harus berupa gambar.");
+      return;
+    }
+    if (isTooBig) {
+      alert("Ukuran maksimum file adalah 3MB.");
+      return;
+    }
+
+    setPosterFile(file);
+    setPosterPreviewUrl(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -87,7 +112,6 @@ export default function FilmForm({
       !form.ageRating ||
       !form.duration ||
       !form.releaseDate ||
-      !form.posterPath ||
       !form.synopsis ||
       !authorId ||
       !studioId ||
@@ -98,7 +122,37 @@ export default function FilmForm({
     }
 
     setIsSubmitting(true);
-    await onSubmit({ ...form, authorId, studioId, genreIds });
+
+    let posterUrl = form.posterPath;
+
+    // Upload file jika ada yang dipilih baru
+    if (posterFile) {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", posterFile);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (!res.ok) {
+        alert("Gagal upload poster.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const data = await res.json();
+      posterUrl = data.url;
+    }
+
+    await onSubmit({
+      ...form,
+      posterPath: posterUrl,
+      authorId,
+      studioId,
+      genreIds,
+    });
+
     setIsSubmitting(false);
   };
 
@@ -110,6 +164,40 @@ export default function FilmForm({
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label>Poster</Label>
+            {posterPreviewUrl ? (
+              <div className="relative w-full max-w-[66%]">
+                <Image
+                  src={posterPreviewUrl}
+                  alt="Poster Preview"
+                  width={400}
+                  height={300}
+                  className="rounded object-cover w-full h-auto shadow"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPosterPreviewUrl(null);
+                    setPosterFile(null);
+                  }}
+                  className="absolute -top-2 -right-2 bg-white text-black rounded-full p-1 shadow-md"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePosterSelect(file);
+                }}
+              />
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label>Title</Label>
             <Input
@@ -201,15 +289,6 @@ export default function FilmForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Poster URL</Label>
-            <Input
-              name="posterPath"
-              value={form.posterPath || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
             <Label>Synopsis</Label>
             <textarea
               name="synopsis"
@@ -219,6 +298,7 @@ export default function FilmForm({
               required
             />
           </div>
+
           <Button className="w-full mt-2" type="submit" disabled={isSubmitting}>
             {isSubmitting
               ? form?.id

@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Schedule added successfully" });
   } catch (error: any) {
+    console.log(error.message);
     return NextResponse.json(
       { error: error.sqlMessage || error.message || "Something went wrong" },
       { status: 400 }

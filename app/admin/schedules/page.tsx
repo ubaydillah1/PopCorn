@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -126,18 +127,28 @@ export default function AdminSchedulesPage() {
         });
         if (!res.ok) throw new Error("Failed to update schedule");
       } else {
-        for (const time of validTimes) {
-          const res = await fetch(`${API_BASE}/schedules`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filmId: formData.filmId,
-              roomId: formData.roomId,
-              showTime: time,
-              price: formData.price,
-            }),
-          });
-          if (!res.ok) throw new Error("Failed to add schedule");
+        try {
+          for (const time of validTimes) {
+            const res = await fetch(`${API_BASE}/schedules`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filmId: formData.filmId,
+                roomId: formData.roomId,
+                showTime: time,
+                price: formData.price,
+              }),
+            });
+            if (!res.ok) {
+              const response = await res.json();
+              console.log(response);
+              throw new Error(response.error || "Failed to add schedule");
+            }
+          }
+        } catch (error: any) {
+          alert(
+            error.message || "Something went wrong while adding schedules."
+          );
         }
       }
       fetchSchedules();
@@ -184,7 +195,7 @@ export default function AdminSchedulesPage() {
                 <th className="p-4 text-left">Room</th>
                 <th className="p-4 text-left">Show Time</th>
                 <th className="p-4 text-left">Price</th>
-                <th className="p-4 text-left">Actions</th>
+                {/* <th className="p-4 text-left">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -196,7 +207,7 @@ export default function AdminSchedulesPage() {
                     {new Date(s.show_time).toLocaleString()}
                   </td>
                   <td className="p-4">$ {s.price.toLocaleString()}</td>
-                  <td className="p-4">
+                  {/* <td className="p-4">
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -213,7 +224,7 @@ export default function AdminSchedulesPage() {
                         Delete
                       </Button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

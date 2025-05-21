@@ -37,6 +37,7 @@ export async function DELETE(
     await pool.query("CALL deleteSchedule(?)", [parseInt(id)]);
     return NextResponse.json({ message: "Schedule deleted successfully" });
   } catch (error: any) {
+    console.log(error.message);
     return NextResponse.json(
       { error: error.sqlMessage || error.message },
       { status: 400 }
