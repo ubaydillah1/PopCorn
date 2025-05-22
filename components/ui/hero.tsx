@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export interface HeroProps {
   title: string;
   posterPath: string;
+  backdropPath?: string;
   rating: string;
   duration: string;
   releaseDate: string;

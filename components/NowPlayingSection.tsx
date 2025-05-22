@@ -9,8 +9,7 @@ import { AlertCircle } from "lucide-react";
 async function fetchNowPlaying() {
   try {
     const res = await fetch(
-      "http://localhost:3000/api/user/tickets/now-showing",
-      { cache: "no-store" }
+      "http://localhost:3000/api/user/tickets/now-showing"
     );
     if (!res.ok) throw new Error("Failed to fetch now showing films");
     const { data } = await res.json();

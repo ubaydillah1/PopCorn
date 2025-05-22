@@ -12,11 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function UserNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null); // 👈 new
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const getAndSetUserInfo = async (userId: string) => {
@@ -25,7 +27,11 @@ export default function UserNav() {
         if (!res.ok) throw new Error("Failed to fetch user data");
         const result = await res.json();
         setUserName(result.name || "User");
-        setUserRole(result.role || null); // 👈 get role
+        setUserRole(result.role || null);
+
+        if (result.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        }
       } catch (err) {
         console.error("Fetch user info error:", err);
         setUserName("User");
@@ -61,7 +67,7 @@ export default function UserNav() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     await authService.signOut();

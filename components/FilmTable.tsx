@@ -37,7 +37,7 @@ export default function FilmTable({ onEdit, refresh, onRefreshed }: Props) {
     } else {
       fetchFilms();
     }
-  }, [refresh]);
+  }, [onRefreshed, refresh]);
 
   const handleDelete = async (id: number) => {
     await fetch(`/api/admin/films/${id}`, { method: "DELETE" });

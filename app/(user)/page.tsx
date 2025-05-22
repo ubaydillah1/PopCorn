@@ -3,6 +3,7 @@ import HeroCarousel from "@/components/HeroSlides";
 import NowPlayingSection from "@/components/NowPlayingSection";
 import ComingSoonSection from "@/components/ComingSoonSection";
 import { Suspense } from "react";
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (

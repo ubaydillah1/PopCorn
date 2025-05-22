@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/authService";
+import { Button } from "@/components/ui/button";
 
 const adminNav = [
   { name: "Dashboard", href: "/admin/dashboard" },
@@ -52,6 +54,11 @@ export default function AdminLayout({
     checkAdmin();
   }, [router]);
 
+  const handleLogout = async () => {
+    await authService.signOut();
+    router.replace("/");
+  };
+
   if (isLoading) return <div className="p-10">Checking access...</div>;
 
   return (
@@ -74,6 +81,13 @@ export default function AdminLayout({
             </Link>
           ))}
         </nav>
+        <Button
+          variant="destructive"
+          className="w-full my-2 hover:bg-red-900"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
       </aside>
 
       <main className="flex-1 p-6 md:p-10 bg-muted/50">{children}</main>

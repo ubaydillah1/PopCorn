@@ -2,15 +2,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/services/authService";
 
-export default function EmailConfirmationPage() {
-  const [isLoading, setIsLoading] = useState(false);
+function EmailConfirmationContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleResend = async () => {
     if (!email) return;
@@ -38,7 +38,7 @@ export default function EmailConfirmationPage() {
         {email && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              Didn’t receive the email?
+              Didn't receive the email?
             </p>
             <Button
               variant="outline"
@@ -58,5 +58,23 @@ export default function EmailConfirmationPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 text-center">
+      <div className="max-w-md w-full space-y-6">
+        <h1 className="text-2xl font-bold text-foreground">Loading...</h1>
+      </div>
+    </div>
+  );
+}
+
+export default function EmailConfirmationPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <EmailConfirmationContent />
+    </Suspense>
   );
 }
