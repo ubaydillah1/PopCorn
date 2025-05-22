@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase/client";
-import { authService } from "@/services/authService";
+import Link from "next/link";
 import { UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,69 +9,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
 
-export default function UserNav() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const router = useRouter();
+interface UserNavProps {
+  isLoggedIn: boolean;
+  userName: string | null;
+  userRole: string | null;
+  onLogout: () => void;
+}
 
-  useEffect(() => {
-    const getAndSetUserInfo = async (userId: string) => {
-      try {
-        const res = await fetch(`/api/user?id=${userId}`);
-        if (!res.ok) throw new Error("Failed to fetch user data");
-        const result = await res.json();
-        setUserName(result.name || "User");
-        setUserRole(result.role || null);
-
-        if (result.role === "ADMIN") {
-          router.push("/admin/dashboard");
-        }
-      } catch (err) {
-        console.error("Fetch user info error:", err);
-        setUserName("User");
-        setUserRole(null);
-      }
-    };
-
-    const init = async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-
-      setIsLoggedIn(!!user);
-
-      if (user) {
-        getAndSetUserInfo(user.id);
-      }
-    };
-
-    init();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user;
-      setIsLoggedIn(!!user);
-
-      if (user) {
-        getAndSetUserInfo(user.id);
-      } else {
-        setUserName(null);
-        setUserRole(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router]);
-
+export default function UserNav({
+  isLoggedIn,
+  userName,
+  userRole,
+  onLogout,
+}: UserNavProps) {
   const handleLogout = async () => {
     await authService.signOut();
-    setIsLoggedIn(false);
-    setUserName(null);
-    setUserRole(null);
+    onLogout();
   };
 
   if (!isLoggedIn) {
@@ -105,7 +58,7 @@ export default function UserNav() {
           >
             <UserCircle2 className="h-5 w-5 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {userName ? userName : "Loading..."}
+              {userName ?? "Loading..."}
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -115,7 +68,7 @@ export default function UserNav() {
         >
           <DropdownMenuItem
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white focus:bg-red-600 focus:text-white px-4 py-2 cursor-pointer"
+            className="bg-red-500 hover:bg-red-600 px-4 py-2 text-white cursor-pointer"
           >
             Logout
           </DropdownMenuItem>
