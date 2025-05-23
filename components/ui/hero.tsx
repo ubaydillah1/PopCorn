@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase/client";
 
 export interface HeroProps {
   title: string;
@@ -108,11 +110,23 @@ function Hero({
   showBookButton = true,
   onBookButtonClick,
 }: HeroProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const formattedDate = new Date(releaseDate).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+
+  useEffect(() => {
+    const init = async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+
+      setIsLoggedIn(!!user);
+    };
+
+    init();
+  }, []);
 
   return (
     <section
@@ -144,7 +158,7 @@ function Hero({
               synopsis={synopsis}
               className="text-center md:text-left"
             />
-            {showBookButton && onBookButtonClick && (
+            {showBookButton && onBookButtonClick && isLoggedIn === true && (
               <Button
                 onClick={onBookButtonClick}
                 className="w-full md:w-auto mt-2"

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import FilmDetailClient from "@/components/FilmDetailClient";
 import { notFound } from "next/navigation";
+import { useState } from "react";
 
 async function getFilmDetail(id: string) {
   try {

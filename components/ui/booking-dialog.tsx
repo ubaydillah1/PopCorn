@@ -181,7 +181,7 @@ export default function BookingDialog({ film }: { film: FilmProps }) {
             {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
           </p>
           <p className="text-muted-foreground mb-4">
-            Total: & {totalPrice.toLocaleString("en-US")}
+            Total: $ {totalPrice.toLocaleString("en-US")}
           </p>
           <Button
             onClick={handleBooking}

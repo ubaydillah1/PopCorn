@@ -117,7 +117,7 @@ export default function AdminReportsPage() {
                   <td className="p-4">{r.film_title}</td>
                   <td className="p-4">{r.tickets_sold}</td>
                   <td className="p-4">
-                    Rp {r.total_income?.toLocaleString("id-ID")}
+                    $ {r.total_income?.toLocaleString("en-US")}
                   </td>
                 </tr>
               ))}
